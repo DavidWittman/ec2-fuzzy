@@ -43,25 +43,35 @@ func findInstance(reservations []*ec2.Reservation) (*ec2.Instance, error) {
 		instance := reservations[i].Instances[0]
 		name := getNameTag(instance)
 
-		// force preview window to bottom. TODO: don't hard-code value length :-\
-		values := 7
-		margin := 3
-		newlines := strings.Repeat("\n", h-margin-values)
-
 		publicIp := "None"
 		if instance.PublicIpAddress != nil {
 			publicIp = *instance.PublicIpAddress
 		}
 
-		return fmt.Sprintf("%sName: %s\nID: %s\nPublic IP: %s\nPrivate IP: %s\nType: %s\nAMI: %s\nLaunch Time: %s",
-			newlines,
+		values := []string{
 			name,
 			*instance.InstanceId,
 			publicIp,
 			*instance.PrivateIpAddress,
 			*instance.InstanceType,
 			*instance.ImageId,
-			*instance.LaunchTime,
+			instance.LaunchTime.String(),
+		}
+
+		// force preview window to bottom
+		margin := 3
+		newlines := strings.Repeat("\n", h-margin-len(values))
+
+		// Convert []string to []interface so we can pass it to Sprintf
+		// https://stackoverflow.com/a/12334902
+		formattedValues := make([]interface{}, len(values)+1)
+		formattedValues[0] = newlines
+		for i, v := range values {
+			formattedValues[i+1] = v
+		}
+
+		return fmt.Sprintf("%sName: %s\nID: %s\nPublic IP: %s\nPrivate IP: %s\nType: %s\nAMI: %s\nLaunch Time: %s",
+			formattedValues...,
 		)
 
 	}
