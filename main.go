@@ -24,15 +24,15 @@ func getNameTag(i *ec2.Instance) string {
 	return ""
 }
 
-func findInstance(reservations []*ec2.Reservation) (*ec2.Instance, error) {
+func findInstance(instances []*ec2.Instance) (*ec2.Instance, error) {
 	displayFn := func(i int) string {
-		name := getNameTag(reservations[i].Instances[0])
+		name := getNameTag(instances[i])
 		if name == "" {
-			return *reservations[i].Instances[0].InstanceId
+			return *instances[i].InstanceId
 		}
 		return fmt.Sprintf("%s (%s)",
 			name,
-			*reservations[i].Instances[0].InstanceId,
+			*instances[i].InstanceId,
 		)
 	}
 
@@ -40,7 +40,7 @@ func findInstance(reservations []*ec2.Reservation) (*ec2.Instance, error) {
 		if i == -1 {
 			return ""
 		}
-		instance := reservations[i].Instances[0]
+		instance := instances[i]
 		name := getNameTag(instance)
 
 		publicIp := "None"
@@ -76,12 +76,22 @@ func findInstance(reservations []*ec2.Reservation) (*ec2.Instance, error) {
 
 	}
 
-	i, err := fzf.Find(reservations, displayFn, fzf.WithPreviewWindow(previewWindow))
+	i, err := fzf.Find(instances, displayFn, fzf.WithPreviewWindow(previewWindow))
 	if err != nil {
 		return nil, err
 	}
 
-	return reservations[i].Instances[0], nil
+	return instances[i], nil
+}
+
+func flattenReservations(reservations []*ec2.Reservation) []*ec2.Instance {
+	var instances []*ec2.Instance
+	for _, r := range reservations {
+		for _, instance := range r.Instances {
+			instances = append(instances, instance)
+		}
+	}
+	return instances
 }
 
 func main() {
@@ -105,7 +115,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	instance, err := findInstance(resp.Reservations)
+	instance, err := findInstance(flattenReservations(resp.Reservations))
 	if err != nil {
 		fmt.Println("No selection made. Exiting.")
 		return
