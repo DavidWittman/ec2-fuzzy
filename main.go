@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -8,14 +9,15 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	fzf "github.com/ktr0731/go-fuzzyfinder"
 	"github.com/spf13/viper"
 )
 
-func getNameTag(i *ec2.Instance) string {
+func getNameTag(i *types.Instance) string {
 	for _, keys := range i.Tags {
 		if *keys.Key == "Name" {
 			return *keys.Value
@@ -24,7 +26,7 @@ func getNameTag(i *ec2.Instance) string {
 	return ""
 }
 
-func findInstance(instances []*ec2.Instance) (*ec2.Instance, error) {
+func findInstance(instances []*types.Instance) (*types.Instance, error) {
 	displayFn := func(i int) string {
 		name := getNameTag(instances[i])
 		if name == "" {
@@ -53,7 +55,7 @@ func findInstance(instances []*ec2.Instance) (*ec2.Instance, error) {
 			*instance.InstanceId,
 			publicIp,
 			*instance.PrivateIpAddress,
-			*instance.InstanceType,
+			string(instance.InstanceType),
 			*instance.ImageId,
 			instance.LaunchTime.String(),
 		}
@@ -84,33 +86,34 @@ func findInstance(instances []*ec2.Instance) (*ec2.Instance, error) {
 	return instances[i], nil
 }
 
-func flattenReservations(reservations []*ec2.Reservation) []*ec2.Instance {
-	var instances []*ec2.Instance
+func flattenReservations(reservations []types.Reservation) []*types.Instance {
+	var instances []*types.Instance
 	for _, r := range reservations {
 		for _, instance := range r.Instances {
-			instances = append(instances, instance)
+			instances = append(instances, &instance)
 		}
 	}
 	return instances
 }
 
 func main() {
-	svc := ec2.New(session.Must(session.NewSession()))
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		log.Fatal(err)
+	}
+	svc := ec2.NewFromConfig(cfg)
 
 	// Only return running instances
 	params := &ec2.DescribeInstancesInput{
-		Filters: []*ec2.Filter{
-			&ec2.Filter{
-				Name: aws.String("instance-state-name"),
-				Values: []*string{
-					aws.String("running"),
-					aws.String("pending"),
-				},
+		Filters: []types.Filter{
+			types.Filter{
+				Name:   aws.String("instance-state-name"),
+				Values: []string{"running", "pending"},
 			},
 		},
 	}
 
-	resp, err := svc.DescribeInstances(params)
+	resp, err := svc.DescribeInstances(context.TODO(), params)
 	if err != nil {
 		log.Fatal(err)
 	}
