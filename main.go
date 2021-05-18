@@ -26,7 +26,27 @@ func getNameTag(i *types.Instance) string {
 	return ""
 }
 
-func findInstance(instances []*types.Instance) (*types.Instance, error) {
+func findInstance(instances []*types.Instance, id string) (*types.Instance, error) {
+	var findById bool
+	// Assume that we're looking for an instance ID if the value starts with `i-`
+	if strings.HasPrefix(id, "i-") {
+		findById = true
+	}
+
+	for _, i := range instances {
+		if findById {
+			if *i.InstanceId == id {
+				return i, nil
+			}
+		} else if getNameTag(i) == id {
+			return i, nil
+		}
+	}
+
+	return nil, fmt.Errorf("Could not find instance matching %s", id)
+}
+
+func fuzzyFindInstance(instances []*types.Instance) (*types.Instance, error) {
 	displayFn := func(i int) string {
 		name := getNameTag(instances[i])
 		if name == "" {
@@ -97,6 +117,8 @@ func flattenReservations(reservations []types.Reservation) []*types.Instance {
 }
 
 func main() {
+	var instance *types.Instance
+
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		log.Fatal(err)
@@ -117,11 +139,21 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	reservations := flattenReservations(resp.Reservations)
 
-	instance, err := findInstance(flattenReservations(resp.Reservations))
-	if err != nil {
-		fmt.Println("No selection made. Exiting.")
-		return
+	if id := viper.GetString("instance"); id != "" {
+		instance, err = findInstance(reservations, id)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	} else {
+		fmt.Println(viper.GetString("instance"))
+		instance, err = fuzzyFindInstance(reservations)
+		if err != nil {
+			fmt.Println("No selection made. Exiting.")
+			return
+		}
 	}
 
 	var ip string

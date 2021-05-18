@@ -10,6 +10,7 @@ import (
 
 func init() {
 	pflag.StringP("user", "u", "", "SSH Username")
+	pflag.StringP("instance", "i", "", "Connect to an instance by name or Instance ID")
 	pflag.Bool("private", false, "Use Private IP address when connecting")
 
 	pflag.Parse()
