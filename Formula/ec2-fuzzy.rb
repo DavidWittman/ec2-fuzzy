@@ -5,20 +5,20 @@
 class Ec2Fuzzy < Formula
   desc "Fuzzy search EC2 instances and SSH to them"
   homepage "https://github.com/DavidWittman/ec2-fuzzy"
-  version "0.0.4"
+  version "0.0.5"
   bottle :unneeded
 
   if OS.mac? && Hardware::CPU.intel?
-    url "https://github.com/DavidWittman/ec2-fuzzy/releases/download/v0.0.4/ec2-fuzzy_0.0.4_Darwin_x86_64.tar.gz"
-    sha256 "1dc7fac3af81d363db07453f3c70eb394ad3c1e73be6ff94c38699b966e74567"
+    url "https://github.com/DavidWittman/ec2-fuzzy/releases/download/v0.0.5/ec2-fuzzy_0.0.5_Darwin_x86_64.tar.gz"
+    sha256 "82626c60b28817be7b44fd407fcb190fe6b32c3d8923b216a27586859802e985"
   end
   if OS.linux? && Hardware::CPU.intel?
-    url "https://github.com/DavidWittman/ec2-fuzzy/releases/download/v0.0.4/ec2-fuzzy_0.0.4_Linux_x86_64.tar.gz"
-    sha256 "47a37aba639f84e47064790f4ebd7adc219ae4861c985684e1c76af5cc7a1962"
+    url "https://github.com/DavidWittman/ec2-fuzzy/releases/download/v0.0.5/ec2-fuzzy_0.0.5_Linux_x86_64.tar.gz"
+    sha256 "954a4f798d467b9cb6d9ef51e1f2d57b98255a096fd4492195f7cc2d46379138"
   end
   if OS.linux? && Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-    url "https://github.com/DavidWittman/ec2-fuzzy/releases/download/v0.0.4/ec2-fuzzy_0.0.4_Linux_arm64.tar.gz"
-    sha256 "fa610ba6825f928e3ee1dfceb3c0248c260bbcfe18da37f8b0793adbfbb4f064"
+    url "https://github.com/DavidWittman/ec2-fuzzy/releases/download/v0.0.5/ec2-fuzzy_0.0.5_Linux_arm64.tar.gz"
+    sha256 "5db8b5ee2a48485147b03cd02977e06570e2a0471a63ed7b03bb53d8712de8b4"
   end
 
   def install
