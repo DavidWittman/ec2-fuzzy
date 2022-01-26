@@ -159,10 +159,10 @@ func main() {
 	var ip string
 	if viper.GetBool("private") {
 		ip = *instance.PrivateIpAddress
+	} else if instance.PublicIpAddress == nil {
+		log.Info("No public IP address found for instance. Trying to connect to the Private IP.")
+		ip = *instance.PrivateIpAddress
 	} else {
-		if instance.PublicIpAddress == nil {
-			log.Fatal("No public IP address found for instance. Set --private flag to connect to the Private IP.")
-		}
 		ip = *instance.PublicIpAddress
 	}
 
