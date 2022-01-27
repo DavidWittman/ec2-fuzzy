@@ -5,12 +5,20 @@
 class Ec2Fuzzy < Formula
   desc "Fuzzy search EC2 instances and SSH to them"
   homepage "https://github.com/DavidWittman/ec2-fuzzy"
-  version "0.0.6"
+  version "0.0.7"
 
   on_macos do
+    if Hardware::CPU.arm?
+      url "https://github.com/DavidWittman/ec2-fuzzy/releases/download/v0.0.7/ec2-fuzzy_0.0.7_Darwin_arm64.tar.gz"
+      sha256 "e030618098927402b3b6bc3db6657349350b257993c1392c612019c41a694ed9"
+
+      def install
+        bin.install "ec2-fuzzy"
+      end
+    end
     if Hardware::CPU.intel?
-      url "https://github.com/DavidWittman/ec2-fuzzy/releases/download/v0.0.6/ec2-fuzzy_0.0.6_Darwin_x86_64.tar.gz"
-      sha256 "ad105c5f4d5fa82ac11a855109500cd7fa8d0c547eede04e1a36551865a149d0"
+      url "https://github.com/DavidWittman/ec2-fuzzy/releases/download/v0.0.7/ec2-fuzzy_0.0.7_Darwin_x86_64.tar.gz"
+      sha256 "fab3927cd37f6ca7da0f60dd5532bed66a61082a8c12755170388c32ae69a9ea"
 
       def install
         bin.install "ec2-fuzzy"
@@ -19,17 +27,17 @@ class Ec2Fuzzy < Formula
   end
 
   on_linux do
-    if Hardware::CPU.intel?
-      url "https://github.com/DavidWittman/ec2-fuzzy/releases/download/v0.0.6/ec2-fuzzy_0.0.6_Linux_x86_64.tar.gz"
-      sha256 "3717f73a10a2ff943b96d1c448c40237874807562b59e3f51fe6a3539e44aa2b"
+    if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
+      url "https://github.com/DavidWittman/ec2-fuzzy/releases/download/v0.0.7/ec2-fuzzy_0.0.7_Linux_arm64.tar.gz"
+      sha256 "f1900bf4d1159c99267de1ca1bc673f6769e1ec1274df9cb2f3c3c8859fba0bb"
 
       def install
         bin.install "ec2-fuzzy"
       end
     end
-    if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/DavidWittman/ec2-fuzzy/releases/download/v0.0.6/ec2-fuzzy_0.0.6_Linux_arm64.tar.gz"
-      sha256 "504aa684a2d8d16b3cf898403d29631824b0fa9701cb437afa4c707c228e7e27"
+    if Hardware::CPU.intel?
+      url "https://github.com/DavidWittman/ec2-fuzzy/releases/download/v0.0.7/ec2-fuzzy_0.0.7_Linux_x86_64.tar.gz"
+      sha256 "cbb65d71cfe3e892396b95c46edd4793935864e00287fd3b5ecfeef2aa52754e"
 
       def install
         bin.install "ec2-fuzzy"
